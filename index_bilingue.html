@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simulateur Hiva Taxi Moorea</title>
+  <style>
+    body { font-family: Arial; padding: 20px; max-width: 500px; margin: auto; }
+    input, select, button { width: 100%; padding: 10px; margin-top: 10px; }
+    h2 { color: #0077cc; }
+    .instructions { background: #f0f8ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    .lang-button { float: right; margin-top: -10px; }
+  </style>
+</head>
+<body>
+  <button class="lang-button" onclick="changerLangue()">
+    EN / FR
+  </button>
+
+  <h2 id="titre">Simulateur Hiva Taxi Moorea</h2>
+
+  <div class="instructions" id="instructions">
+    <p>* Allez sur <strong>Google Maps</strong></p>
+    <p>* Cherchez le nombre de kilomètres pour votre itinéraire</p>
+    <p>* Remplissez le formulaire ci-dessous</p>
+    <p>* Cliquez sur "Calculer le tarif"</p>
+    <p>Merci beaucoup et profitez de votre visite !</p>
+  </div>
+
+  <label id="distanceLabel">Distance (km) :</label>
+  <input type="number" id="distance" placeholder="Ex: 12" />
+
+  <label id="heureLabel">Heure de départ :</label>
+  <input type="time" id="heure" />
+
+  <label id="bagagesLabel">Bagages > 5 kg :</label>
+  <input type="number" id="bagages" value="0" />
+
+  <label id="hauteurLabel">Lieu en hauteur ?</label>
+  <select id="hauteur">
+    <option value="0">Non / No</option>
+    <option value="500">Oui / Yes</option>
+  </select>
+
+  <label id="encombrantLabel">Objets encombrants (surf, glacière) ?</label>
+  <select id="encombrant">
+    <option value="0">Non / No</option>
+    <option value="500">Oui / Yes</option>
+  </select>
+
+  <label id="passagersLabel">Nombre total de passagers :</label>
+  <input type="number" id="passagers" value="1" />
+
+  <button onclick="calculer()" id="calculerBtn">Calculer le tarif</button>
+
+  <h3 id="resultat"></h3>
+  <a id="whatsapp" target="_blank">Envoyer sur WhatsApp</a>
+
+  <script>
+    let langue = "fr";
+
+    function changerLangue() {
+      langue = langue === "fr" ? "en" : "fr";
+      document.getElementById('titre').innerText = langue === "fr" ? "Simulateur Hiva Taxi Moorea" : "Hiva Taxi Moorea Fare Estimator";
+      document.getElementById('instructions').innerHTML = langue === "fr"
+        ? `<p>* Allez sur <strong>Google Maps</strong></p>
+           <p>* Cherchez le nombre de kilomètres pour votre itinéraire</p>
+           <p>* Remplissez le formulaire ci-dessous</p>
+           <p>* Cliquez sur "Calculer le tarif"</p>
+           <p>Merci beaucoup et profitez de votre visite !</p>`
+        : `<p>* Go to <strong>Google Maps</strong></p>
+           <p>* Find the number of kilometers for your route</p>
+           <p>* Fill out the form below</p>
+           <p>* Click "Calculate the fare"</p>
+           <p>Thank you and enjoy your visit!</p>`;
+      document.getElementById('distanceLabel').innerText = langue === "fr" ? "Distance (km) :" : "Distance (km):";
+      document.getElementById('heureLabel').innerText = langue === "fr" ? "Heure de départ :" : "Departure time:";
+      document.getElementById('bagagesLabel').innerText = langue === "fr" ? "Bagages > 5 kg :" : "Luggage > 5 kg:";
+      document.getElementById('hauteurLabel').innerText = langue === "fr" ? "Lieu en hauteur ?" : "Uphill destination?";
+      document.getElementById('encombrantLabel').innerText = langue === "fr" ? "Objets encombrants (surf, glacière) ?" : "Bulky items (surfboard, cooler)?";
+      document.getElementById('passagersLabel').innerText = langue === "fr" ? "Nombre total de passagers :" : "Total number of passengers:";
+      document.getElementById('calculerBtn').innerText = langue === "fr" ? "Calculer le tarif" : "Calculate the fare";
+      document.getElementById('whatsapp').innerText = langue === "fr" ? "Envoyer sur WhatsApp" : "Send via WhatsApp";
+    }
+
+    function calculer() {
+      const distance = parseFloat(document.getElementById('distance').value);
+      const heure = document.getElementById('heure').value;
+      const bagages = parseInt(document.getElementById('bagages').value);
+      const hauteur = parseInt(document.getElementById('hauteur').value);
+      const encombrant = parseInt(document.getElementById('encombrant').value);
+      const passagers = parseInt(document.getElementById('passagers').value);
+
+      const base = 1000;
+      const tarifJour = 160;
+      const tarifNuit = 260;
+
+      const h = parseInt(heure.split(":")[0]);
+      const nuit = h < 6 || h >= 20;
+      const tarifKm = nuit ? tarifNuit : tarifJour;
+
+      const extraBagages = bagages * 100;
+      const extraPassagers = passagers > 4 ? 500 : 0;
+
+      const total = base + (distance * tarifKm) + extraBagages + hauteur + encombrant + extraPassagers;
+      document.getElementById('resultat').innerText = 
+        (langue === "fr" ? "Tarif estimé : " : "Estimated fare: ") + total + " XPF";
+
+      const message = 
+        (langue === "fr" ? "Bonjour, je souhaite réserver un taxi." : "Hello, I would like to book a taxi.") + `\n` +
+        (langue === "fr" ? "Distance : " : "Distance: ") + distance + " km\n" +
+        (langue === "fr" ? "Heure : " : "Time: ") + heure + "\n" +
+        (langue === "fr" ? "Passagers : " : "Passengers: ") + passagers + "\n" +
+        (langue === "fr" ? "Bagages : " : "Luggage: ") + bagages + "\n" +
+        (langue === "fr" ? "Prix estimé : " : "Estimated fare: ") + total + " XPF";
+
+      const whatsappLink = `https://wa.me/68989651380?text=${encodeURIComponent(message)}`;
+      document.getElementById('whatsapp').href = whatsappLink;
+    }
+  </script>
+</body>
+</html>
